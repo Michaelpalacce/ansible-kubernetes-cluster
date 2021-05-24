@@ -1,3 +1,10 @@
 multi_master: no
 load_balancer:
 pod_cidr: 192.168.0.0/16
+
+setup_cni: yes
+cni_setup_command: kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml && kubectl apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+cni_controller_name: calico-kube-controllers
+
+generate_join_commands: yes
+join_commands_dir: ./output

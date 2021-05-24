@@ -1,5 +1,10 @@
 Ansible playbook that is used to setup a kubernetes cluster.
 
+This will just init the cluster and it will copy the join commands for workers and for masters.
+This role will also setup a CNI according to `setup_cni`.
+
+Can be used to generate join commands when there is already a cluster running.
+
 # Dependencies
 
 `michaelpalacce.kubernetes_preflight` Used to get all the binaries before setting the cluster up
@@ -29,3 +34,40 @@ The POD CIDR to be provided to the kubeadm init command. Check out your CNI for 
 by default uses 192.168.0.0/16
 Defaults to: `192.168.0.0/16`
 
+
+~~~
+setup_cni
+~~~
+A flag whether this role should setup a CNI according to the given variables.
+Defaults to: `yes`
+
+
+~~~
+cni_setup_command
+~~~
+The CNI setup command. Usually most CNIs have some manifest you can apply directly.
+Defaults to: `kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml && kubectl apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml`
+
+
+~~~
+cni_controller_name
+~~~
+The CNI controller name that will be used to verify the CNI is up and running
+Defaults to: `calico-kube-controllers`
+
+
+
+~~~
+generate_join_commands
+~~~
+A flag whether to generate join commands for the workers.
+If multi_master is set, then master join commands will be generated as well.
+Defaults to: `yes`
+
+
+
+~~~
+join_commands_dir
+~~~
+An absolute or relative path where the join commands will be fetched.
+Defaults to: `./output`

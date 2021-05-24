@@ -1,8 +1,8 @@
 - name: Attempt to check if we have k8s cluster. Will not init a new cluster, attemping to continue in case of failure
   command: kubeadm init phase preflight
   ignore_errors: yes
-  no_log: true
   register: preflight
+  changed_when: preflight.rc != 0
 
 - name: Init single master kubernetes cluster
   command: kubeadm init --pod-network-cidr={{ pod_cidr }}
@@ -13,3 +13,82 @@
   command: kubeadm init --control-plane-endpoint "{{ load_balancer }}:6443" --upload-certs --pod-network-cidr={{ pod_cidr }}
   register: master_init
   when: multi_master and preflight.rc == 0
+
+- name: Register user_id
+  command: id -u
+  register: user_id
+
+- name: Register group_id
+  command: id -g
+  register: group_id
+
+- name: Ensure directory ~/.kube exists
+  file:
+      state: directory
+      path: ~/.kube
+      owner: "{{ user_id.stdout }}"
+      group: "{{ group_id.stdout }}"
+
+- name: Copy admin.conf to ~/.kube/conf
+  copy:
+      remote_src: yes
+      dest: ~/.kube/conf
+      src: /etc/kubernetes/admin.conf
+      owner: "{{ user_id.stdout }}"
+      group: "{{ group_id.stdout }}"
+
+- name: Ensure there is a pod network
+  shell: "{{ cni_setup_command }}"
+  when: setup_cni
+
+- name: Wait for pod network controller to be running
+  shell: "kubectl get po -A | grep {{ cni_controller_name }}"
+  register: pod_network_running
+  until: pod_network_running.stdout.find("Running") != -1
+  retries: 60
+  delay: 2
+  when: setup_cni
+
+- name: Ensure file exists
+  copy:
+      content: ""
+      dest: "{{ item }}"
+      force: yes
+  with_items:
+      - /tmp/join-command
+      - /tmp/master-join-command
+  when: generate_join_commands
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+  when: generate_join_commands
+
+- name: Generate certificate to use
+  command: kubeadm certs certificate-key
+  register: certificate_key
+  when: generate_join_commands
+
+- name: Upload certs with generated certificate
+  command: "kubeadm init phase upload-certs --upload-certs --certificate-key {{ certificate_key.stdout }}"
+  when: generate_join_commands
+
+- name: Save worker join command
+  shell: "echo -n '{{ join_command.stdout }}' >> /tmp/join-command"
+  when: generate_join_commands
+
+- name: Save master join command
+  shell: "echo -n '{{ join_command.stdout }} --control-plane --certificate-key {{ certificate_key.stdout }}' >> /tmp/master-join-command"
+  when: generate_join_commands
+
+- name: Copy join commands to local files
+  fetch:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      flat: yes
+  with_items:
+      - src: /tmp/join-command
+        dest: "{{ join_commands_dir }}/join-command"
+      - src: /tmp/master-join-command
+        dest: "{{ join_commands_dir }}/master-join-command"
+  when: generate_join_commands
