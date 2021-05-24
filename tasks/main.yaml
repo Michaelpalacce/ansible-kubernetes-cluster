@@ -1,0 +1,15 @@
+- name: Attempt to check if we have k8s cluster. Will not init a new cluster, attemping to continue in case of failure
+  command: kubeadm init phase preflight
+  ignore_errors: yes
+  no_log: true
+  register: preflight
+
+- name: Init single master kubernetes cluster
+  command: kubeadm init --pod-network-cidr={{ pod_cidr }}
+  register: master_init
+  when: not multi_master and preflight.rc == 0
+
+- name: Init multi master kubernetes cluster
+  command: kubeadm init --control-plane-endpoint "{{ load_balancer }}:6443" --upload-certs --pod-network-cidr={{ pod_cidr }}
+  register: master_init
+  when: multi_master and preflight.rc == 0
