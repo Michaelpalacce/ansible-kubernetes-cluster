@@ -14,28 +14,12 @@
   register: master_init
   when: multi_master and preflight.rc == 0
 
-- name: Register user_id
-  command: id -u
-  register: user_id
-
-- name: Register group_id
-  command: id -g
-  register: group_id
-
-- name: Ensure directory ~/.kube exists
-  file:
-      state: directory
-      path: ~/.kube
-      owner: "{{ user_id.stdout }}"
-      group: "{{ group_id.stdout }}"
-
-- name: Copy admin.conf to ~/.kube/conf
-  copy:
-      remote_src: yes
-      dest: ~/.kube/conf
-      src: /etc/kubernetes/admin.conf
-      owner: "{{ user_id.stdout }}"
-      group: "{{ group_id.stdout }}"
+- name: Setup kubeconfig
+  shell: "{{ item }}"
+  with_items:
+      - mkdir -p $HOME/.kube
+      - /bin/cp /etc/kubernetes/admin.conf $HOME/.kube/config
+      - chown $(id -u):$(id -g) $HOME/.kube/config
 
 - name: Ensure there is a pod network
   shell: "{{ cni_setup_command }}"
