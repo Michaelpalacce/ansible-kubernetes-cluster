@@ -7,4 +7,4 @@ cni_setup_command: kubectl apply -f https://docs.projectcalico.org/manifests/tig
 cni_controller_name: calico-kube-controllers
 
 generate_join_commands: yes
-join_commands_dir: ./output
+output_dir: ./output

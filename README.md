@@ -67,7 +67,7 @@ Defaults to: `yes`
 
 
 ~~~
-join_commands_dir
+output_dir
 ~~~
-An absolute or relative path where the join commands will be fetched.
+An absolute or relative path where the join commands and the config will be fetched.
 Defaults to: `./output`

@@ -65,14 +65,16 @@
   shell: "echo -n '{{ join_command.stdout }} --control-plane --certificate-key {{ certificate_key.stdout }}' >> /tmp/master-join-command"
   when: generate_join_commands
 
-- name: Copy join commands to local files
+- name: Copy output to local files
   fetch:
       src: "{{ item.src }}"
       dest: "{{ item.dest }}"
       flat: yes
   with_items:
       - src: /tmp/join-command
-        dest: "{{ join_commands_dir }}/join-command"
+        dest: "{{ output_dir }}/join-command"
       - src: /tmp/master-join-command
-        dest: "{{ join_commands_dir }}/master-join-command"
+        dest: "{{ output_dir }}/master-join-command"
+      - src: ~/.kube/config
+        dest: "{{ output_dir }}/config"
   when: generate_join_commands
