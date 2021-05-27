@@ -1,6 +1,5 @@
 ---
-dependencies:
-    - michaelpalacce.kubernetes_preflight
+dependencies: []
 
 galaxy_info:
     role_name: kubernetes_cluster

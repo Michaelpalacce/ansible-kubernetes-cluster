@@ -5,11 +5,8 @@ This role will also setup a CNI according to `setup_cni`.
 
 Can be used to generate join commands when there is already a cluster running.
 
-# Dependencies
-
-`michaelpalacce.kubernetes_preflight` Used to get all the binaries before setting the cluster up
-
 # Important
+`michaelpalacce.kubernetes_preflight` Or something that sets up all the dependencies must be used
 This roles does NOT install a CRI. You must install one beforehand. Consider adding `michaelpalacce.docker` role to install docker as a cri.
 
 # Supported variables
