@@ -5,7 +5,7 @@
   changed_when: preflight.rc != 0
 
 - name: Init single master kubernetes cluster
-  command: kubeadm init --pod-network-cidr={{ pod_cidr }}
+  command: "kubeadm init --pod-network-cidr={{ pod_cidr }} --service-cidr={{ service_cidr }}"
   register: master_init
   when: not multi_master and preflight.rc == 0
 

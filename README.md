@@ -33,6 +33,13 @@ Defaults to: `192.168.0.0/16`
 
 
 ~~~
+service_cidr
+~~~
+The Service CIDR to be provided to the kubeadm init command.
+Defaults to: `10.96.0.0/12`
+
+
+~~~
 setup_cni
 ~~~
 A flag whether this role should setup a CNI according to the given variables.

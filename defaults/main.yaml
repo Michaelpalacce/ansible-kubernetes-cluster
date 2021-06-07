@@ -1,6 +1,7 @@
 multi_master: no
 load_balancer:
 pod_cidr: 192.168.0.0/16
+service_cidr: 10.96.0.0/12
 
 setup_cni: yes
 cni_setup_command: kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml && kubectl apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml
